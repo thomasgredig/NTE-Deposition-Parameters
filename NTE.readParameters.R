@@ -3,8 +3,9 @@
 ##########################################
 
 # CONFIGURATION
-filename = "7.22.2017.txt"
-
+path.RAW = '/Users/gredigcsulb/Dropbox'
+file.list = file.path(path.RAW, dir(path.RAW, pattern='_NTE_', recursive = TRUE))
+filename = file.list[2]
 
 ##########################################
 library(chron)
@@ -24,11 +25,22 @@ d$time.sec = period_to_seconds(hms(d$time))
 d$time.step = c(1E-6,diff(d$time.sec))
 d$deposition.rate = c(0,diff(d$thickness)) / d$time.step
 d$deposition.rate.smooth = predict(sm.spline(d$time.sec, d$deposition.rate, df=60), d$time.sec)
-head(d)
+d$deposition.rate[which(abs(d$deposition.rate)>3)] <- NA
+
+
+plot(d2$thickness)
+plot(d$deposition.rate, ylim=c(-0.2,2))
 
 # determine active times
-start.deposition = max(which(d$thickness== 0))
+start.deposition = which(d$deposition.rate>0.1)[1]
 d2 = d[start.deposition:nrow(d),]
+q = which(d2$deposition.rate.smooth<1E-10)
+d2 = d2[1:q[min(length(q),20)],]
+plot(d2$thickness)
+
+ggplot(d2, aes(time.sec, thickness)) +
+  geom_point(col='red') 
+
 d3 = melt(d2, id.vars='time.sec')
 d3$value = as.numeric(d3$value)
 
@@ -46,8 +58,10 @@ d.deposit = subset(d2, time.sec>=deposition.start & time.sec<=deposition.end)
 thickness.est = d2$thickness[deposition.end.elem] - d2$thickness[deposition.start.elem]
 time.est = deposition.end - deposition.start
 ggplot(d2, aes(time.sec, thickness)) +
-  geom_rect(aes(xmin=deposition.start, xmax=deposition.end, ymin=-Inf, ymax=Inf),fill='grey90',alpha=0.1, color='grey') +
-  geom_point(col='red') +
+  geom_point(col='red') 
+  geom_rect(aes(xmin=deposition.start, xmax=deposition.end, ymin=-Inf, ymax=Inf),
+            fill='grey90',alpha=0.1, color='grey') +
+  
   ylab('thickness (units)') +
   ggtitle(paste('estimated thickness: ',thickness.est,'units; est. time: ',time.est,'s')) +
   theme_bw(base_size=14)
