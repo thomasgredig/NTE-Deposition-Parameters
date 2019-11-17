@@ -3,9 +3,9 @@
 ##########################################
 
 # CONFIGURATION
-path.RAW = '/Users/gredigcsulb/Dropbox'
+source('config.R')
 file.list = file.path(path.RAW, dir(path.RAW, pattern='_NTE_', recursive = TRUE))
-filename = file.list[2]
+
 
 ##########################################
 library(chron)
@@ -13,23 +13,23 @@ library(lubridate)
 library(ggplot2)
 library(reshape2)
 library(pspline)
-#library(colortools)
+library(cowplot)
+source('func.R')
+
+filename = file.list[3]
+d = NTE.load(file.list[3])
+g1 = NTE.plotSummary(d, sz=1)
+print(g1)
+ggsave('images/plotSummary.png', width=4,height=3, dpi=300)
+
+d2 = NTE.depStartEnd(d)
+g2 = NTE.plotSummary(d2, sz=1)
+print(g2)
+ggsave('images/plotDeposition.png', width=4,height=3, dpi=300)
 
 
-# load the data and create extra columns
-d <- read.csv(filename, header=FALSE, sep='\t')
-names(d)=c('pressure','T1','T2','T.substrate','thickness','timedate','na')
-d$na <- NULL
-d$time <- chron(times. = substr(d$timedate,1,8))
-d$time.sec = period_to_seconds(hms(d$time))
-d$time.step = c(1E-6,diff(d$time.sec))
-d$deposition.rate = c(0,diff(d$thickness)) / d$time.step
-d$deposition.rate.smooth = predict(sm.spline(d$time.sec, d$deposition.rate, df=60), d$time.sec)
-d$deposition.rate[which(abs(d$deposition.rate)>3)] <- NA
-
-
-plot(d2$thickness)
-plot(d$deposition.rate, ylim=c(-0.2,2))
+summary(d2)
+NTE.getParams(d)
 
 # determine active times
 start.deposition = which(d$deposition.rate>0.1)[1]
