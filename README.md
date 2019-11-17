@@ -30,7 +30,7 @@ g2 = NTE.plotSummary(d2, sz=1)
 print(g2)
 ```
 
-![quad graph](images/plotSummary.png)
+![quad graph](images/plotDeposition.png)
 
 Average parameters can be found as follows:
 
@@ -39,4 +39,14 @@ summary(d2)
 NTE.getParams(d)
 ```
 
+
+## NTE.plotDeposition
+
+Here is an example that shows the relevant portions of the deposition with 0.8 (or 80%) of time scale on the left and right:
+
+```R
+g3 = NTE.plotDeposition(d,0.8)
+print(g3)
+```
+![quad graph](images/plotDepositionColor.png)
 
