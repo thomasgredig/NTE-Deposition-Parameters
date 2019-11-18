@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-*.R
+myConfig.R
 .DS_Store
